@@ -10,53 +10,66 @@ const getUsers = (request, response) => {
 }
 
 const createUser = (request, response) => {
-    const {name, email } = request.body
+    const { name, email } = request.body;
 
-    pool.query('INSERT INTO users(name, email) VALUES($1, $2)', [name, email], (error, results) => {
-        if(error) {
-            throw error      
+    if (!name || !email) {
+        return response.status(400).json({ error: "Name and email are required" });
+    }
+
+    pool.query('INSERT INTO users(name, email) VALUES($1, $2) RETURNING *', [name, email], (error, results) => {
+        if (error) {
+            throw error;
         }
-        response.status(201).send('User added successfully');
+        response.status(201).json(results.rows[0]);
     });
 }
 
+
+
 const getUserById = (request, response) => {
-    const id = parseInt(request.params.id)
+    const id = parseInt(request.params.id);
+    if (isNaN(id)) return response.status(400).json({ error: "Invalid ID" });
 
     pool.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
-        if(error) {
-            throw error
+        if (error) throw error;
+        if (results.rows.length === 0) {
+            return response.status(404).json({ error: "User not found" });
         }
-        response.status(200).json(results.rows[0])
-    })
+        response.status(200).json(results.rows[0]);
+    });
 }
 
-const updateUser = (request, response) => {
-    const id = parseInt(request.params.id);
-    const { name, email } = request.body
 
-    pool.query(
-        'UPDATE users SET name = $1, email = $2 WHERE id = $3',
-        [name, email, id],
-        (error, results) => {
-            if(error) {
-                throw error
-            }
-            response.status(200).send(`User updated with ID: ${id}`)
-        }
-    )
-}
+const updateUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
 
-const deleteUser = (request, response) => {
-    const id = parseInt(request.params.id)
+  const { name, email } = req.body;
+  if (!name || !email) return res.status(400).json({ error: "Name and email are required" });
 
-    pool.query('DELETE FROM users WHERE id=$1', [id], (error, results) => {
-        if(error) {
-            throw error
-        }
-        response.status(200).send(`User deleted with id: ${id}`);
-    })
-}
+  pool.query(
+    'UPDATE users SET name=$1, email=$2 WHERE id=$3 RETURNING *',
+    [name, email, id],
+    (err, result) => {
+      if (err) throw err;
+      if (result.rows.length === 0) return res.status(404).json({ error: "User not found" });
+      res.status(200).json(result.rows[0]);
+    }
+  );
+};
+
+
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+
+  pool.query('DELETE FROM users WHERE id=$1 RETURNING *', [id], (err, result) => {
+    if (err) throw err;
+    if (result.rows.length === 0) return res.status(404).json({ error: "User not found" });
+    res.status(200).json({ message: `User deleted with ID: ${id}` });
+  });
+};
+
 
 module.exports = {
     getUsers,

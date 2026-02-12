@@ -20,6 +20,10 @@ app.post('/users/', db.createUser);
 app.patch('/users/:id', db.updateUser);
 app.delete('/users/:id', db.deleteUser);
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}`);
-});
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`App running on port ${port}`);
+    });
+}
+
+module.exports = app;
