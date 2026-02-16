@@ -46,6 +46,13 @@ describe("Users API Endpoints", () => {
     expect(res.body.name).toBe("Updated User");
     expect(res.body.email).toBe("updated@example.com");
   });
+//hapi path for delete user
+  it("DELETE /users/:id - should delete a user", async () => {
+    const res = await request(app)
+      .delete(`/users/${testUserId}`);
+    expect(res.statusCode).toBe(200);
+  });
+  
 //sad path for invalid id
   it("PATCH /users/:id — should return 404 if user not found", async () => {
     const res = await request(app)
@@ -54,4 +61,27 @@ describe("Users API Endpoints", () => {
     expect(res.statusCode).toBe(404);
     expect(res.body).toHaveProperty("error");
   });
+
+//sad path for missing name/email.
+  it("POST/users - should return 400 if name or email is missing", async () => {
+    const res = await request(app)
+      .post("/users/")
+      .send({ })
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("GET /users/:id - should return 404 if user is not found", async () => {
+    const res = await request(app)
+      .get("/users/999999")
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("DELETE /users/:id - should return 404 if user is not found", async () => {
+    const res = await request(app)
+      .delete("/users/999999");
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toHaveProperty("error");
+  })
 });
