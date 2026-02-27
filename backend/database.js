@@ -1,10 +1,8 @@
-const Pool = require('pg').Pool
+// backend/database.js
+const { Pool } = require('pg');
+
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'testing',
-  password: 'helloworld',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL || "postgres://postgres:helloworld@localhost:5432/testing"
 });
 
 module.exports = pool;
