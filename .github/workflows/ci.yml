@@ -39,7 +39,7 @@ jobs:
         working-directory: backend
 
       - name: 🏗️ Setup database
-        run: node backend/setupDb.js
+        run: node setupDb.js
         working-directory: backend
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/testdb
